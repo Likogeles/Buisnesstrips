@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request, make_response, jsonify, Blueprint
 from flask_login import LoginManager
-
+# Проверка gita
 from data import db_session, products, users, loginform, registerform, addproductform, baseform
 
 
