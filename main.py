@@ -3,6 +3,8 @@ from flask_login import LoginManager
 # Проверка gita
 from data import db_session, products, users, loginform, registerform, addproductform, baseform
 
+# проект
+a = 0
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
