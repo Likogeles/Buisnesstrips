@@ -14,4 +14,4 @@ class User(db_session.SqlAlchemyBase, UserMixin):
     email = sqlalchemy.Column(sqlalchemy.String,
                               index=True, unique=True, nullable=True)
     password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    city = sqlalchemy.Column(sqlalchemy.String, nullable=True)

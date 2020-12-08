@@ -1,5 +1,9 @@
 from flask import Flask, render_template, redirect, request, make_response, jsonify, Blueprint
 from flask_login import LoginManager
+import json
+import requests
+from datetime import date
+
 from data import db_session, trips, users, loginform, registerform, addtrip, baseform
 
 app = Flask(__name__)
@@ -23,31 +27,32 @@ def load_user(user_id):
     return session.query(users.User).get(user_id)
 
 
-# def main():
-#     db_session.global_init("db/Buisness_trips.sqlite.sqlite")
-#     session = db_session.create_session()
-#
-#     product = products.Product()
-#     product.seller_id = 1
-#     product.seller = "Scott"
-#     product.title = "first product"
-#     product.number = 15
-#     product.description = "description"
-#     product.price = "12"
-#     product.product_type = "Телефон"
-#     product.image = "/static/img/Nope.png"
-#     product.link = "/product_link/1"
-#     product.del_link = "/del_product/1"
-#     product.order_link = "/order_link/1"
-#     session.add(product)
-#
-#     user1 = users.User()
-#     user1.name = "Scott"
-#     user1.email = "scott_chief@mars.org"
-#     user1.hashed_password = 123
-#     session.add(user1)
-#
-#     session.commit()
+def main():
+    pass
+    # db_session.global_init("db/Buisness_trips.sqlite.sqlite")
+    # session = db_session.create_session()
+    #
+    # product = products.Product()
+    # product.seller_id = 1
+    # product.seller = "Scott"
+    # product.title = "first product"
+    # product.number = 15
+    # product.description = "description"
+    # product.price = "12"
+    # product.product_type = "Телефон"
+    # product.image = "/static/img/Nope.png"
+    # product.link = "/product_link/1"
+    # product.del_link = "/del_product/1"
+    # product.order_link = "/order_link/1"
+    # session.add(product)
+    #
+    # user1 = users.User()
+    # user1.name = "Scott"
+    # user1.email = "scott_chief@mars.org"
+    # user1.hashed_password = 123
+    # session.add(user1)
+    #
+    # session.commit()
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -90,7 +95,7 @@ def login():
     if form.validate_on_submit():
         user = session.query(users.User).filter(users.User.email == form.email.data).first()
         if user:
-            if user.hashed_password == form.password.data:
+            if user.password == form.password.data:
                 res = make_response(redirect("/"))
                 res.set_cookie("user_id", str(user.id), max_age=60 * 60)
                 return res
@@ -235,28 +240,71 @@ def log_out():
 @app.route('/add_trip', methods=['GET', 'POST'])
 def add_trip():
 
-    if not request.cookies.get("user_id", 0):
-        return make_response(redirect("/"))
+    # if not request.cookies.get("user_id", 0):
+    #     return make_response(redirect("/login"))
 
     form = addtrip.AddTripForm()
     db_session.global_init("db/Buisness_trips.sqlite")
     session = db_session.create_session()
 
+
     if form.validate_on_submit():
 
         trip = trips.Trip()
-        trip.traveler_id = request.cookies.get("user_id", 0)
-        trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+
+        # trip.traveler_id = request.cookies.get("user_id", 0)
+        # trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+        # city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+
+        trip.city_from = form.city_from.data
         trip.city_where = form.city_where.data
+        date = form.hostel_time_in.data
+        print(date)
 
+        if not form.duration.data.isdigit():
+            return render_template('addtrip.html', messageduration="Продолжительность поездки введена неверно")
 
+        URL_FLIGHT = 'http://api.travelpayouts.com/data/ru/cities.json'
+        response = requests.request("GET", URL_FLIGHT)
+        todos = json.loads(response.text)
 
-        session.add(trip)
-        session.commit()
+        from_code = 0
+        for i in todos:
+            if i['name'] == trip.city_from:
+                from_code = i['code']
+                break
+        if from_code == 0:
+            return render_template('addtrip.html', messagefrom="Город вылета не найден", form=form)
 
-        return redirect("/=")
-    username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-    return render_template('addtrip.html', title='Добавить товар', username=username, form=form)
+        where_code = 0
+        for i in todos:
+            if i['name'] == form.city_where.data:
+                where_code = i['code']
+                break
+        if where_code == 0:
+            return render_template('addtrip.html', messagewhere="Город назначения не найден", form=form)
+
+        print(trip.city_from, form.city_where.data)
+
+        # URL_FLIGHT = 'http://api.travelpayouts.com/v2/prices/latest'
+        # querystring = {
+        #     "origin": from_code,
+        #     "destination": where_code,
+        #     "depart_date": "2020-12",
+        #     "return_date": "2021-02"
+        # }
+        #
+        # headers = {'x-access-token': 'f69935f4d595df3fa57f95cf98bebf86'}
+        # response = requests.request("GET", URL_FLIGHT, headers=headers, params=querystring)
+        # print(response.text)
+        #
+        # session.commit()
+
+        return redirect("/")
+    return render_template('addtrip.html', title='Добавить поездку', form=form)
+
+    # username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+    # return render_template('addtrip.html', title='Добавить поездку', username=username, form=form)
 
 
 @app.route('/mytrips', methods=['GET', 'POST'])
