@@ -6,8 +6,8 @@ from wtforms.fields.html5 import EmailField
 
 
 class AddTripForm(FlaskForm):
-    city_from = StringField('Откуда', validators=[DataRequired()])
-    city_where = StringField('Город', validators=[DataRequired()])
+    city_from = StringField('Город отъезда', validators=[DataRequired()])
+    city_where = StringField('Город командировки', validators=[DataRequired()])
     hostel_time_in = DateField('Дата въезда в отель', validators=[DataRequired()])
     duration = StringField('Продолжительность поездки (в днях)', validators=[DataRequired()])
     description = StringField('Описание поездки', validators=[DataRequired()])

@@ -48,6 +48,13 @@
     <div class="col"></div>
     <div class="col" align="center">
         {{ form.hidden_tag() }}
+        <p align="center">
+            {% if messagecity %}
+                <div class="alert alert-danger" role="alert">
+                    {{ messagecity }}
+                </div>
+            {% endif %}
+        </p>
         <p>
             {{ form.city_from.label }}<br>
             {{ form.city_from(class="form-control", placeholder="Город") }}<br>
@@ -57,13 +64,6 @@
                 </div>
             {% endfor %}
         </p>
-        <p align="center">
-            {% if messagefrom %}
-                <div class="alert alert-danger" role="alert">
-                    {{ messagefrom }}
-                </div>
-            {% endif %}
-        </p>
         <p>
             {{ form.city_where.label }}<br>
             {{ form.city_where(class="form-control", placeholder="Город") }}<br>
@@ -72,13 +72,6 @@
                     {{ error }}
                 </div>
             {% endfor %}
-        </p>
-        <p align="center">
-            {% if messagewhere %}
-                <div class="alert alert-danger" role="alert">
-                    {{ messagewhere }}
-                </div>
-            {% endif %}
         </p>
         <p>
             {{ form.hostel_time_in.label }}<br>

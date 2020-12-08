@@ -249,9 +249,7 @@ def add_trip():
 
 
     if form.validate_on_submit():
-
         trip = trips.Trip()
-
         # trip.traveler_id = request.cookies.get("user_id", 0)
         # trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
         # city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
@@ -262,29 +260,18 @@ def add_trip():
         print(date)
 
         if not form.duration.data.isdigit():
-            return render_template('addtrip.html', messageduration="Продолжительность поездки введена неверно")
+            return render_template('addtrip.html', messageduration="Продолжительность поездки введена неверно", form=form)
 
-        URL_FLIGHT = 'http://api.travelpayouts.com/data/ru/cities.json'
-        response = requests.request("GET", URL_FLIGHT)
+        URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
+
+        response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
+        if todos:
+            print(todos['origin']['iata'])
+            print(todos['destination']['iata'])
+        else:
+            return render_template('addtrip.html', messagecity="Название одного из городов введено неверно", form=form)
 
-        from_code = 0
-        for i in todos:
-            if i['name'] == trip.city_from:
-                from_code = i['code']
-                break
-        if from_code == 0:
-            return render_template('addtrip.html', messagefrom="Город вылета не найден", form=form)
-
-        where_code = 0
-        for i in todos:
-            if i['name'] == form.city_where.data:
-                where_code = i['code']
-                break
-        if where_code == 0:
-            return render_template('addtrip.html', messagewhere="Город назначения не найден", form=form)
-
-        print(trip.city_from, form.city_where.data)
 
         # URL_FLIGHT = 'http://api.travelpayouts.com/v2/prices/latest'
         # querystring = {
