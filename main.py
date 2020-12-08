@@ -11,6 +11,7 @@ login_manager.init_app(app)
 
 blueprint = Blueprint('products_api', __name__, template_folder='templates')
 
+a = 0
 
 @app.route('/cookie_drop')
 def cookie_drop():
