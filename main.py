@@ -247,7 +247,8 @@ def add_trip():
         trip = trips.Trip()
         trip.traveler_id = request.cookies.get("user_id", 0)
         trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-        trip.city_where = form.title.data
+        trip.city_where = form.city_where.data
+
 
 
         session.add(trip)

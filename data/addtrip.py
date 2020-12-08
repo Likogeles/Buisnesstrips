@@ -18,5 +18,6 @@ class AddTripForm(FlaskForm):
     departure_time_home = StringField('Время вылета домой', validators=[DataRequired()])
     hostel_time_in = StringField('Въезд в отель', validators=[DataRequired()])
     hostel_time_out = StringField('Выезд из отеля', validators=[DataRequired()])
+    duration = StringField('Продолжительность поездки', validators=[DataRequired()])
 
     submit = SubmitField('Добавить')

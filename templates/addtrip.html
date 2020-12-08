@@ -41,9 +41,9 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.hostel_time_out.label }}<br>
-            {{ form.hostel_time_out(class="form-control", placeholder="Дата начала") }}<br>
-            {% for error in form.hostel_time_out.errors %}
+            {{ form.duration.label }}<br>
+            {{ form.duration(class="form-control", placeholder="Дата начала") }}<br>
+            {% for error in form.duration.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>

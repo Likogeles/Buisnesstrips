@@ -22,5 +22,6 @@ class Trip(db_session.SqlAlchemyBase, SerializerMixin):
     flight_price = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     hostel_time_in = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
     hostel_time_out = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+    duration = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
     user = orm.relation('User')
