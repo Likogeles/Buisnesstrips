@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark justify-content-between">
+    <a class="btn btn-primary text-wrap" href="/" role="button" style="width: 10rem;"><h5>АлиАкспресс</h5></a>
+<!--    <div class="badge badge-primary text-wrap" style="width: 13rem;" align="center">-->
+<!--        <h4>АлиАкспресc</h4>-->
+<!--    </div>-->
+</nav>
+<br>
+<br>
+<br>
+<h1 align="center">Добавление товара</h1>
+<form action="" method="post" novalidate>
+    <div class="row">
+    <div class="col"></div>
+    <div class="col" align="center">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(class="form-control", placeholder="Название") }}<br>
+            {% for error in form.title.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.description.label }}<br>
+            {{ form.description(class="form-control", placeholder="Описание") }}<br>
+            {% for error in form.description.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.product_type.label }}<br>
+            {{ form.product_type(class="form-control", placeholder="ПК, телефон или пр.") }}<br>
+            {% for error in form.product_type.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.number.label }}<br>
+            {{ form.number(class="form-control", placeholder="Количество") }}<br>
+            {% for error in form.number.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+            <p>
+                {% if numbermassage %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ numbermassage }}
+                    </div>
+                {% endif %}
+            </p>
+        <p>
+            {{ form.price.label }}<br>
+            {{ form.price(class="form-control", placeholder="Цена") }}<br>
+            {% for error in form.price.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+            <p>
+                {% if pricemassage %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ pricemassage }}
+                    </div>
+                {% endif %}
+            </p>
+
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </div>
+    <div class="col"></div>
+    </div>
+</form>
+</body>

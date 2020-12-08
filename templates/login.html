@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark justify-content-between">
+    <a class="btn btn-primary text-wrap" href="/" role="button" style="width: 10rem;"><h5>АлиАкспресс</h5></a>
+<!--    <div class="badge badge-primary " style="width: 13rem;" align="center">-->
+<!--        <h4>АлиАкспресc</h4>-->
+<!--    </div>-->
+</nav>
+<br>
+<br>
+<br>
+<h1 align="center">Авторизация</h1>
+<form action="" method="post" novalidate>
+    <div class="row">
+    <div class="col"></div>
+    <div class="col-auto" align="center">
+        {{ form.hidden_tag() }}
+        <p align="center">
+            {{ form.email.label }}<br>
+            {{ form.email(class="form-control", placeholder="Ваш Email") }}<br>
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p align="center">
+            {% if messageemail %}
+                <div class="alert alert-danger" role="alert">
+                    {{ messageemail }}
+                </div>
+            {% endif %}
+        </p>
+        <p align="center">
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control", type="password", placeholder="Ваш пароль") }}<br>
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p align="center">
+            {% if messagepass %}
+                <div class="alert alert-danger" role="alert">
+                    {{ messagepass }}
+                </div>
+            {% endif %}
+        </p>
+        <p align="center">
+            <a class="btn btn-primary" href="/register" role="button">Регистрация</a>
+            {{ form.submit(type="submit", class="btn btn-primary") }}
+        </p>
+    </div>
+    <div class="col"></div>
+    </div>
+</form>
+</body>

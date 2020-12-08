@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+<h1 align="center">Товары:</h1>
+</div>
+{% if products %}
+    {% for item in products %}
+        <div>
+            <a href= {{item.link}} role="button"><h5>{{ item.title }}</h5></a>
+            <div>
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <td><img src={{item.image}} alt="Ну не нашлась картинка" class="img-thumbnail"></td>
+                      <td>Продавец:<br>{{ item.seller }}</td>
+                      <td>Тип:<br>{{ item.product_type }}</td>
+                      <td>Описание:<br>{{ item.description }}</td>
+                      <td>Осталось:<br>{{ item.number }} шт.</td>
+                      <td>Цена:<br>{{ item.price }} $</td>
+                      <td><a class="btn btn-dark" href= {{item.link}} role="button">Открыть страницу в магазине</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <h5 align="center">Похоже, ничего не нашлось :-(</h5>
+{% endif %}
+{% endblock %}

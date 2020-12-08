@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+<h1 align="center">{{ title }}</h1>
+</div>
+<div>
+    <div>
+        <table class="table">
+              <tbody>
+                    <tr>
+                        <td><img src={{product.image}} alt="Ну не нашлась картинка" class="img-thumbnail"></td>
+                        <td>Описание:<br>{{ product.description }}</td>
+                        <td>Тип:<br>{{ product.product_type }}</td>
+                        <td>Продавец:<br>{{ product.seller }}</td>
+                        <td>Осталось:<br>{{ product.number }} шт.</td>
+                        <td>Цена:<br>{{ product.price }} $</td>
+                        {% if userid == product.seller_id %}
+                            <td><a class="btn btn-outline-success" href={{product.del_link}} role="button">Удалить товар</a></td>
+                        {% elif username %}
+                            {% if product.number > 0 %}
+                                <td><a class="btn btn-outline-success" href={{product.order_link}} role="button">Заказать</a></td>
+                            {% else %}
+                                <td>Похоже, товар закончился(</td>
+                            {% endif %}
+                        {% else %}
+                            <td><p>Чтобы заказать товар вам нужно <a href="/login" role="button">войти в свой аккаунт</a></p></td>
+                        {% endif %}
+                    </tr>
+              </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

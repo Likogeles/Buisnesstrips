@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark justify-content-between">
+    <a class="btn btn-primary text-wrap" href="/" role="button" style="width: 10rem;"><h5>АлиАкспресс</h5></a>
+<!--    <div class="badge badge-primary text-wrap" style="width: 13rem;" align="center">-->
+<!--        <h4>АлиАкспресc</h4>-->
+<!--    </div>-->
+</nav>
+<br>
+<br>
+<br>
+<h1 align="center">Регистрация</h1>
+<form action="" method="post" novalidate>
+    <div class="row">
+    <div class="col"></div>
+    <div class="col-auto" align="center">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(class="form-control", type="string", placeholder="Ваше имя") }}<br>
+            {% for error in form.name.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(class="form-control", placeholder="Ваш email") }}<br>
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {% if emailmassage %}
+                <div class="alert alert-danger" role="alert">
+                    {{ emailmassage }}
+                </div>
+            {% endif %}
+        </p>
+        <p>
+            {{ form.password1.label }}<br>
+            {{ form.password1(class="form-control", type="password", placeholder="Ваш пароль") }}<br>
+            {% for error in form.password1.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }}<br>
+            {{ form.password2(class="form-control", type="password", placeholder="Повторите ваш пароль") }}<br>
+            {% for error in form.password2.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {% if passwordmassage %}
+                <div class="alert alert-danger" role="alert">
+                    {{ passwordmassage }}
+                </div>
+            {% endif %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </div>
+    <div class="col"></div>
+    </div>
+</form>
+</body>
