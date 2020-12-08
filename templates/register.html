@@ -26,9 +26,18 @@
     <div class="col-auto" align="center">
         {{ form.hidden_tag() }}
         <p>
-            {{ form.name.label }}<br>
-            {{ form.name(class="form-control", type="string", placeholder="Ваше имя") }}<br>
-            {% for error in form.name.errors %}
+            {{ form.firstname.label }}<br>
+            {{ form.firstname(class="form-control", type="string", placeholder="Имя") }}<br>
+            {% for error in form.firstname.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.firstname.label }}<br>
+            {{ form.firstname(class="form-control", type="string", placeholder="Фамилия") }}<br>
+            {% for error in form.firstname.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
