@@ -4,6 +4,8 @@ import json
 import requests
 from datetime import date
 
+from fpdf import FPDF
+
 from data import db_session, trips, users, loginform, registerform, addtrip, baseform
 
 app = Flask(__name__)
@@ -235,6 +237,22 @@ def log_out():
 #         else:
 #             return redirect("/")
 
+def ExporToPDF(data, spacing=1):
+    pdf = FPDF()
+    pdf.set_font("Arial", size=14)
+    pdf.add_page()
+
+    col_width = pdf.w / 4.5
+    row_height = pdf.font_size
+    for row in data:
+        for item in row:
+            pdf.cell(col_width, row_height * spacing,
+                     txt=item, border=1)
+        pdf.ln(row_height * spacing)
+
+    pdf.output('Depurt_City.pdf')
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/add_trip', methods=['GET', 'POST'])
@@ -270,6 +288,8 @@ def add_trip():
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
         if todos:
+            data = [['origin', 'destination'], [todos['origin']['iata'], todos['destination']['iata']]]
+            ExporToPDF(data, spacing=1)
             print(todos['origin']['iata'])
             print(todos['destination']['iata'])
         else:
