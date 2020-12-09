@@ -240,30 +240,33 @@ def log_out():
 @app.route('/add_trip', methods=['GET', 'POST'])
 def add_trip():
 
-    # if not request.cookies.get("user_id", 0):
-    #     return make_response(redirect("/login"))
-
     form = addtrip.AddTripForm()
     db_session.global_init("db/Buisness_trips.sqlite")
     session = db_session.create_session()
 
-
     if form.validate_on_submit():
         trip = trips.Trip()
-        # trip.traveler_id = request.cookies.get("user_id", 0)
-        # trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-        # city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
 
-        trip.city_from = form.city_from.data
-        trip.city_where = form.city_where.data
-        date = form.hostel_time_in.data
-        print(date)
+        datee = form.departure_time_city.data - date.today()
+        if datee.days < 14:
+            return render_template('addtrip.html', messagedate="Слишком рано, измените дату", form=form)
 
-        if not form.duration.data.isdigit():
+        datee = form.departure_time_home.data - form.departure_time_city.data
+        if datee.days < 0:
             return render_template('addtrip.html', messageduration="Продолжительность поездки введена неверно", form=form)
 
-        URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
+        if request.cookies.get("user_id", 0):
+            trip.traveler_id = request.cookies.get("user_id", 0)
+            trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+            trip.city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+        else:
+            trip.city_from = form.city_from.data
 
+        trip.city_where = form.city_where.data
+        trip.description = form.description.data
+        trip.departure_time_city = form.departure_time_city.data
+
+        URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
         if todos:
@@ -272,26 +275,24 @@ def add_trip():
         else:
             return render_template('addtrip.html', messagecity="Название одного из городов введено неверно", form=form)
 
+        trip.departure_time_home = trip.departure_time_city
 
-        # URL_FLIGHT = 'http://api.travelpayouts.com/v2/prices/latest'
-        # querystring = {
-        #     "origin": from_code,
-        #     "destination": where_code,
-        #     "depart_date": "2020-12",
-        #     "return_date": "2021-02"
-        # }
-        #
-        # headers = {'x-access-token': 'f69935f4d595df3fa57f95cf98bebf86'}
-        # response = requests.request("GET", URL_FLIGHT, headers=headers, params=querystring)
-        # print(response.text)
-        #
         # session.commit()
+        if request.cookies.get("user_id", 0):
+            username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+            username += ' ' + session.query(users.User).filter(
+                users.User.id == request.cookies.get("user_id", 0)).first().secondname
+            usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+            return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
+                                   messagecomplite="Форма поездки составлена, составить новую?", form=form)
+        return render_template('addtrip.html', title='Добавить поездку', messagecomplite="Форма поездки составлена, составить новую?", form=form)
 
-        return redirect("/")
+    if request.cookies.get("user_id", 0):
+        username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+        username += ' ' + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
+        usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+        return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity, form=form)
     return render_template('addtrip.html', title='Добавить поездку', form=form)
-
-    # username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-    # return render_template('addtrip.html', title='Добавить поездку', username=username, form=form)
 
 
 @app.route('/mytrips', methods=['GET', 'POST'])

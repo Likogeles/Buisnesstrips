@@ -49,24 +49,34 @@
     <div class="col" align="center">
         {{ form.hidden_tag() }}
         <p align="center">
+            {% if messagecomplite %}
+                <div class="alert alert-info" role="alert">
+                    {{ messagecomplite }}
+                </div>
+            {% endif %}
+        </p>
+        <p align="center">
             {% if messagecity %}
                 <div class="alert alert-danger" role="alert">
                     {{ messagecity }}
                 </div>
             {% endif %}
         </p>
-        <p>
-            {{ form.city_from.label }}<br>
-            {{ form.city_from(class="form-control", placeholder="Город") }}<br>
-            {% for error in form.city_from.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </p>
+        {% if not usercity %}
+            <p>
+                {{ form.city_from.label }}<br>
+                {{ form.city_from(class="form-control", placeholder="Название города") }}
+                <br>
+                {% for error in form.city_from.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </p>
+        {% endif %}
         <p>
             {{ form.city_where.label }}<br>
-            {{ form.city_where(class="form-control", placeholder="Город") }}<br>
+            {{ form.city_where(class="form-control", placeholder="Название города") }}<br>
             {% for error in form.city_where.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
@@ -74,18 +84,25 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.hostel_time_in.label }}<br>
-            {{ form.hostel_time_in(type="date") }}<br><br>
-            {% for error in form.hostel_time_in.errors %}
+            {{ form.departure_time_city.label }}<br>
+            {{ form.departure_time_city(type="date") }}<br><br>
+            {% for error in form.departure_time_city.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
+        <p align="center">
+            {% if messagedate %}
+                <div class="alert alert-danger" role="alert">
+                    {{ messagedate }}
+                </div>
+            {% endif %}
+        </p>
         <p>
-            {{ form.duration.label }}<br>
-            {{ form.duration(class="form-control", placeholder="Продолжительность поездки") }}<br>
-            {% for error in form.duration.errors %}
+            {{ form.departure_time_home.label }}<br>
+            {{ form.departure_time_home(type="date") }}<br><br>
+            {% for error in form.departure_time_home.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
