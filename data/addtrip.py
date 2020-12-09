@@ -20,4 +20,4 @@ class AddTripForm(FlaskForm):
     # flight_company = StringField('Авиакомпания', validators=[DataRequired()])
     # hostel_time_out = StringField('Выезд из отеля', validators=[DataRequired()])
 
-    submit = SubmitField('Добавить')
+    submit = SubmitField('Оформить в PDF')

@@ -265,17 +265,107 @@ def add_trip():
         trip.city_where = form.city_where.data
         trip.description = form.description.data
         trip.departure_time_city = form.departure_time_city.data
+        trip.departure_time_home = form.departure_time_home.data
 
         URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
         if todos:
-            print(todos['origin']['iata'])
-            print(todos['destination']['iata'])
+            print(todos['origin']['iata'], "->", todos['destination']['iata'])
         else:
             return render_template('addtrip.html', messagecity="Название одного из городов введено неверно", form=form)
 
-        trip.departure_time_home = trip.departure_time_city
+
+        URL_FLIGHT = 'http://engine.hotellook.com/api/v2/cache.json'
+        querystring = {"location": todos['destination']['iata'],
+                       "checkIn": str(trip.departure_time_city),
+                       "checkOut": str(trip.departure_time_home),
+                       "limit": "40",
+                       "currency": "RUB",
+                       "adults": "1"
+                       }
+        response = requests.request("GET", URL_FLIGHT, params=querystring)
+        todos1 = json.loads(response.text)
+        hostel = ["notname", 0.1, 0.1]
+        max = -1
+        for i in todos1:
+            if max < int(i["priceFrom"]) < 7000:
+                max = int(i["priceFrom"])
+                hostel[0] = i["hotelName"]
+                hostel[1] = i["location"]["geo"]["lon"]
+                hostel[2] = i["location"]["geo"]["lat"]
+        if max == -1:
+            if request.cookies.get("user_id", 0):
+                username = session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().name
+                username += ' ' + session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().secondname
+                usercity = session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().city
+                return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
+                                       messagenotcomplite="Отели не найдены, повторите попытку", form=form)
+            return render_template('addtrip.html', title='Добавить поездку', messagenotcomplite="Отели не найдены, повторите попытку",
+                                   form=form)
+        trip.hostel = hostel[0]
+        trip.hostel_price = max
+        trip.hostel_coordx = hostel[1]
+        trip.hostel_coordy = hostel[2]
+
+        URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
+        querystring = {"origin": todos['origin']['iata'],
+                       "destination": todos['destination']['iata'],
+                       "depart_date": str(trip.departure_time_city),
+                       "one_way": "true",
+                       }
+        response = requests.request("GET", URL_FLIGHT, params=querystring)
+        todos2 = json.loads(response.text)
+        company = '0'
+        price = 9999999
+        datetime_flight = 0
+        for i in todos2["best_prices"]:
+            if i["gate"] == "Aeroflot":
+                if i['value'] < price:
+                    company = "Aeroflot"
+                    price = int(i["value"])
+                    datetime_flight = i['found_at']
+        if company == '0':
+            for i in todos2["best_prices"]:
+                    if i['value'] < price:
+                        company = i["gate"]
+                        price = int(i["value"])
+                        datetime_flight = i['found_at']
+        trip.flight_company1 = company
+        trip.flight_price1 = price
+        trip.flight_time1 = datetime_flight
+
+        URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
+        querystring = {"origin": todos['origin']['iata'],
+                       "destination": todos['destination']['iata'],
+                       "depart_date": str(trip.departure_time_home),
+                       "one_way": "true",
+                       }
+        response = requests.request("GET", URL_FLIGHT, params=querystring)
+        todos2 = json.loads(response.text)
+        company = '0'
+        price = 9999999
+        datetime_flight = 0
+        for i in todos2["best_prices"]:
+            if i["gate"] == "Aeroflot":
+                if i['value'] < price:
+                    company = "Aeroflot"
+                    price = int(i["value"])
+                    datetime_flight = i['found_at']
+        if company == '0':
+            for i in todos2["best_prices"]:
+                    if i['value'] < price:
+                        company = i["gate"]
+                        price = int(i["value"])
+                        datetime_flight = i['found_at']
+        trip.flight_company2 = company
+        trip.flight_price2 = price
+        trip.flight_time2 = datetime_flight
+        print(trip.flight_company1, trip.flight_price1, trip.flight_time1)
+        print(trip.flight_company2, trip.flight_price2, trip.flight_time2)
 
         # session.commit()
         if request.cookies.get("user_id", 0):
@@ -284,8 +374,8 @@ def add_trip():
                 users.User.id == request.cookies.get("user_id", 0)).first().secondname
             usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
             return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
-                                   messagecomplite="Форма поездки составлена, составить новую?", form=form)
-        return render_template('addtrip.html', title='Добавить поездку', messagecomplite="Форма поездки составлена, составить новую?", form=form)
+                                   messagecomplite="Форма поездки составлена", form=form)
+        return render_template('addtrip.html', title='Добавить поездку', messagecomplite="Форма поездки составлена", form=form)
 
     if request.cookies.get("user_id", 0):
         username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
