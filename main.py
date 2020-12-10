@@ -162,6 +162,7 @@ def add_trip():
         if request.cookies.get("user_id", 0):
             trip.traveler_id = request.cookies.get("user_id", 0)
             trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+            trip.traveler += " " + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
             trip.city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
 
         else:
@@ -271,9 +272,9 @@ def add_trip():
                     users.User.id == request.cookies.get("user_id", 0)).first().secondname
                 usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
                 return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
-                                       messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда", form=form)
+                                       messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда, или город отправления", form=form)
             return render_template('addtrip.html', title='Добавить поездку',
-                                   messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда", form=form)
+                                   messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда, или город отправления", form=form)
 
         URL_FLIGHT = 'http://api.travelpayouts.com/v1/prices/direct'
         querystring = {"origin": origin,
@@ -329,10 +330,10 @@ def add_trip():
                 usercity = session.query(users.User).filter(
                     users.User.id == request.cookies.get("user_id", 0)).first().city
                 return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
-                                       messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
+                                       messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения, или город отправления",
                                        form=form)
             return render_template('addtrip.html', title='Добавить поездку',
-                                   messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
+                                   messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения, или город отправления",
                                    form=form)
 
         # traveler-
@@ -360,22 +361,52 @@ def add_trip():
                 ['Авиакомпания перелёта в пункт назначения', str(trip.flight_company1)],
                 ['Дата вылета в город назначения', str(trip.departure_date_city)[8:] + "-" + str(trip.departure_date_city)[5:7] + "-" + str(trip.departure_date_city)[:4]],
                 ['Время вылета в город назначения', str(trip.departure_time1)],
-                ['Цена полёта в город назначения', str(trip.flight_price1)],
+                ['Цена полёта в город назначения', str(trip.flight_price1) + " руб."],
 
                 ['Авиакомпания перелёта обратно', str(trip.flight_company2)],
                 ['Дата вылета обратно', str(trip.departure_date_home)[8:] + "-" + str(trip.departure_date_home)[5:7] + "-" + str(trip.departure_date_home)[:4]],
                 ['Время вылета обратно', str(trip.departure_time2)],
-                ['Цена полёта обратно', str(trip.flight_price2)],
+                ['Цена полёта обратно', str(trip.flight_price2) + " руб."],
 
                 ['Отель', str(trip.hostel)],
                 ['Дата заезда в отель', str(trip.departure_date_city)[8:] + "-" + str(trip.departure_date_city)[5:7] + "-" + str(trip.departure_date_city)[:4]],
                 ['Дата отъезда из отеля', str(trip.departure_date_home)[8:] + "-" + str(trip.departure_date_home)[5:7] + "-" + str(trip.departure_date_home)[:4]],
 
-                ['Цена проживания за всё время', str(trip.hostel_price)],
+                ['Цена проживания в отеле за всё время', str(trip.hostel_price) + " руб."],
                 ['Координаты отеля', str(trip.hostel_coordx) + ", " + str(trip.hostel_coordy)],
-                ['Продолжительность поездки (в днях)', str(trip.duration)],
+                ['Продолжительность поездки', str(trip.duration) + " дн."],
+
+                ['Цена итого', str(int(trip.flight_price1) + int(trip.flight_price2) + int(trip.hostel_price)) + " руб."],
+
                 ['Описание поездки', str(trip.description)]]
         print(data)
+        q = -1
+        for i in session.query(trips.Trip).all():
+            q = i
+        trip.id = q.id + 1
+
+        trip.traveler = str(trip.traveler)
+        trip.city_from = str(trip.city_from)
+        trip.city_where = str(trip.city_where)
+        trip.hostel = str(trip.hostel)
+        trip.hostel_price = str(trip.hostel_price)
+        trip.hostel_coordx = str(trip.hostel_coordx)
+        trip.hostel_coordy = str(trip.hostel_coordy)
+        trip.flight_company1 =str(trip.flight_company1)
+        trip.flight_price1 = str(trip.flight_price1)
+        trip.flight_time1 = str(trip.flight_time1)
+        trip.flight_company2 = str(trip.flight_company2)
+        trip.flight_price2 = str(trip.flight_price2)
+        trip.flight_time2 = str(trip.flight_time2)
+        trip.departure_date_city = str(trip.departure_date_city)
+        trip.departure_date_home = str(trip.departure_date_home)
+        trip.duration = str(trip.duration)
+        trip.description = str(trip.description)
+
+
+        if request.cookies.get("user_id", 0):
+            session.add(trip)
+        session.commit()
         ExporToPDF(data, spacing=3)
         return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
 
@@ -387,7 +418,7 @@ def add_trip():
     return render_template('addtrip.html', title='Добавить поездку', form=form)
 
 
-@app.route('/mytrips', methods=['GET', 'POST'])
+@app.route('/my_trips', methods=['GET', 'POST'])
 def mytrips():
     db_session.global_init("db/Buisness_trips.sqlite")
     session = db_session.create_session()
@@ -395,12 +426,25 @@ def mytrips():
     tripes = session.query(trips.Trip)
 
     if request.method == "GET":
-        tripes = list(tripes)
-        if request.cookies.get("user_id", 0):
-            username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-            username += " " + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
-            return render_template('trips.html', title="Мои поездки", trip=tripes, username=username)
-        return render_template('trips.html', title="Мои поездки", trip=tripes)
+        userid = request.cookies.get("user_id", 0)
+        arr = []
+
+        for item in tripes:
+            if userid == item.traveler_id:
+                words ={"city_where": item.city_where,
+                        "description": item.description,
+                        "departure_date_city": item.departure_date_city,
+                        "departure_date_home": item.departure_date_home,
+                        "duration": item.duration,
+                        "price": int(item.flight_price1) + int(item.flight_price2) + int(item.hostel_price)
+                        }
+                arr.append(words)
+
+        print(arr)
+        username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+        username += " " + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
+        session.commit()
+        return render_template('trips.html', title="Мои поездки", trips=arr, username=username)
 
 
 if __name__ == '__main__':

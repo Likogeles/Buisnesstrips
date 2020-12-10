@@ -1,24 +1,59 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div>
-<h1 align="center">Товары:</h1>
-</div>
-{% if products %}
-    {% for item in products %}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark justify-content-between">
+    <a class="btn btn-primary text-wrap" href="/" role="button" style="width: 20rem;"><h5>Добавить поездку</h5></a>
+        <div></div>
+        <div></div>
         <div>
-            <a href= {{item.link}} role="button"><h5>{{ item.title }}</h5></a>
+            {% if username %}
+                <a class="btn btn-warning" href="/my_trips" role="button">Мои командировки</a>
+            {% endif %}
+        </div>
+        <div>
+            {% if username %}
+                <a class="display-6 text-white" >{{ username }}</a>
+            {% endif %}
+        </div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div>
+            {% if username %}
+                <a class="btn btn-success" href="/log_out" role="button">Выйти</a>
+            {% else %}
+                <a class="btn btn-primary" href="/register" role="button">Регистрация</a>
+                <a class="btn btn-success" href="/login" role="button">Войти</a>
+            {% endif %}
+        </div>
+</nav>
+<div><br><br><br>
+<h1 align="center">Ваши поездки:</h1>
+</div>
+{% if trips %}
+    {% for item in trips %}
+        <div>
             <div>
                 <table class="table">
                   <tbody>
                     <tr>
-                      <td><img src={{item.image}} alt="Ну не нашлась картинка" class="img-thumbnail"></td>
-                      <td>Продавец:<br>{{ item.seller }}</td>
-                      <td>Тип:<br>{{ item.product_type }}</td>
-                      <td>Описание:<br>{{ item.description }}</td>
-                      <td>Осталось:<br>{{ item.number }} шт.</td>
-                      <td>Цена:<br>{{ item.price }} $</td>
-                      <td><a class="btn btn-dark" href= {{item.link}} role="button">Открыть страницу в магазине</a></td>
+                      <td>Город назначения:<br>{{ item['city_where'] }}</td>
+                      <td>Цель:<br>{{ item['description'] }}</td>
+                      <td>Дата отъезда:<br>{{ item['departure_date_city'] }}</td>
+                      <td>Дата возвращения:<br>{{ item['departure_date_home'] }}</td>
+                      <td>Продолжительность:<br>{{ item['duration'] }} дн.</td>
+                      <td>Общая цена:<br>{{ item['price'] }} руб.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -26,6 +61,7 @@
         </div>
     {% endfor %}
 {% else %}
+    <br>
     <h5 align="center">Похоже, ничего не нашлось :-(</h5>
 {% endif %}
-{% endblock %}
+</body>
