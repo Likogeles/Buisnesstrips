@@ -125,9 +125,8 @@ def log_out():
 
 def ExporToPDF(data, spacing=1):
     pdf = FPDF()
-    pdf.set_font("Arial", size=14)
+    pdf.set_font("DejaVuSansCondenced", size=14)
     pdf.add_page()
-
     col_width = pdf.w / 4.5
     row_height = pdf.font_size
     for row in data:
@@ -135,7 +134,6 @@ def ExporToPDF(data, spacing=1):
             pdf.cell(col_width, row_height * spacing,
                      txt=item, border=1)
         pdf.ln(row_height * spacing)
-
     pdf.output('Depurt_City.pdf')
 
 
@@ -175,18 +173,10 @@ def add_trip():
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
         if todos:
-            data = [['City of depurter', trip.city_from ],
-                    ['Destinatioin city',trip.city_where],
-                    ['Flight price', str(trip.flight_price)],
-                    ['Time in dep city ', str(trip.departure_time_city)],
-                    ['Flight company dep', str(trip.flight_company)],
-                    ['Flight company destin', 'Член'],
-                    ['Hostel', str(trip.hostel)],
-                    ['Hostel price', str(trip.hostel_price)]]
-            ExporToPDF(data, spacing=8)
-            print(trip.city_from)
-            print(todos['destination']['iata'])
-            print(trip.flight_price)
+            print(todos['origin']['iata'] + "->" + todos['destination']['iata'])
+
+            origin = todos['origin']['iata']
+            dest = todos['destination']['iata']
         else:
             return render_template('addtrip.html', messagecity="Название одного из городов введено неверно", form=form)
 
@@ -226,76 +216,132 @@ def add_trip():
         trip.hostel_coordx = hostel[1]
         trip.hostel_coordy = hostel[2]
 
+
+        URL_FLIGHT = 'http://api.travelpayouts.com/v1/prices/direct'
+        querystring = {"origin": origin,
+                       "destination": dest,
+                       "depart_date": "2020-12-10",
+                       "token": "f69935f4d595df3fa57f95cf98bebf86",
+                       }
+        response = requests.request("GET", URL_FLIGHT, params=querystring)
+        todos3 = json.loads(response.text)
+        if todos3["data"]:
+            todos3 = todos3["data"]
+            mini = 99999999
+            price = 0
+            airline = 0
+            flight_number = 0
+            departure_at = 0
+            for i in todos3[dest]:
+                if todos3[dest][i]['airline'] == "SU":
+                    if mini > todos3[dest][i]['price']:
+                        price = todos3[dest][i]['price']
+                        airline = 'Aeroflot'
+                        flight_number = todos3[dest][i]['flight_number']
+                        departure_at = todos3[dest][i]['departure_at']
+
+            if mini == 99999999:
+                air = 0
+                for i in todos3[dest]:
+                    if mini > todos3[dest][i]['price']:
+                        price = todos3[dest][i]['price']
+                        air = todos3[dest][i]['airline']
+                        flight_number = todos3[dest][i]['flight_number']
+                        departure_at = todos3[dest][i]['departure_at']
+
+                URL_FLIGHT = 'http://api.travelpayouts.com/data/ru/airlines.json'
+                querystring = {"token": "f69935f4d595df3fa57f95cf98bebf86"}
+                response = requests.request("GET", URL_FLIGHT, params=querystring)
+                todos4 = json.loads(response.text)
+
+                for i in todos4:
+                    if i['code'] == air:
+                        airline = i['name_translations']['en']
+                trip.flight_price1 = price
+                trip.flight_company1 = airline
+                trip.flight_number1 = flight_number
+                trip.departure_date_city = departure_at[:11]
+                trip.departure_time1 = departure_at[11:]
+        else:
+            if request.cookies.get("user_id", 0):
+                username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
+                username += ' ' + session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().secondname
+                usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+                return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
+                                       messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда", form=form)
+            return render_template('addtrip.html', title='Добавить поездку',
+                                   messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда", form=form)
+
+        URL_FLIGHT = 'http://api.travelpayouts.com/v1/prices/direct'
+        querystring = {"origin": origin,
+                       "destination": dest,
+                       "depart_date": "2020-12-10",
+                       "token": "f69935f4d595df3fa57f95cf98bebf86",
+                       }
+        response = requests.request("GET", URL_FLIGHT, params=querystring)
+        todos3 = json.loads(response.text)
+        if todos3["data"]:
+            todos3 = todos3["data"]
+            mini = 99999999
+            price = 0
+            airline = 0
+            flight_number = 0
+            departure_at = 0
+            for i in todos3[dest]:
+                if todos3[dest][i]['airline'] == "SU":
+                    if mini > todos3[dest][i]['price']:
+                        price = todos3[dest][i]['price']
+                        airline = 'Aeroflot'
+                        flight_number = todos3[dest][i]['flight_number']
+                        departure_at = todos3[dest][i]['departure_at']
+
+            if mini == 99999999:
+                air = 0
+                for i in todos3[dest]:
+                    if mini > todos3[dest][i]['price']:
+                        price = todos3[dest][i]['price']
+                        air = todos3[dest][i]['airline']
+                        flight_number = todos3[dest][i]['flight_number']
+                        departure_at = todos3[dest][i]['departure_at']
+
+                URL_FLIGHT = 'http://api.travelpayouts.com/data/ru/airlines.json'
+                querystring = {"token": "f69935f4d595df3fa57f95cf98bebf86"}
+                response = requests.request("GET", URL_FLIGHT, params=querystring)
+                todos4 = json.loads(response.text)
+
+                for i in todos4:
+                    if i['code'] == air:
+                        airline = i['name_translations']['en']
+                trip.flight_price2 = price
+                trip.flight_company2 = airline
+                trip.flight_number2 = flight_number
+                trip.departure_date_home = departure_at[:11]
+                trip.departure_time2 = departure_at[11:]
+        else:
+            if request.cookies.get("user_id", 0):
+                username = session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().name
+                username += ' ' + session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().secondname
+                usercity = session.query(users.User).filter(
+                    users.User.id == request.cookies.get("user_id", 0)).first().city
+                return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
+                                       messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
+                                       form=form)
+            return render_template('addtrip.html', title='Добавить поездку',
+                                   messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
+                                   form=form)
+        data = [['City of depurter', trip.city_from],
+                ['Destinatioin city', trip.city_where],
+                ['Flight price', str(trip.flight_price)],
+                ['Time in dep city ', str(trip.departure_time_city)],
+                ['Flight company dep', str(trip.flight_company)],
+                ['Flight company destin', 'Член'],
+                ['Hostel', str(trip.hostel)],
+                ['Hostel price', str(trip.hostel_price)]]
+        ExporToPDF(data, spacing=8)
         return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
-
-
-
-        URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
-        querystring = {"origin": todos['origin']['iata'],
-                       "destination": todos['destination']['iata'],
-                       "depart_date": str(trip.departure_time_city),
-                       "one_way": "true",
-                       }
-        response = requests.request("GET", URL_FLIGHT, params=querystring)
-        todos2 = json.loads(response.text)
-        company = '0'
-        price = 9999999
-        datetime_flight = 0
-        for i in todos2["best_prices"]:
-            if i["gate"] == "Aeroflot":
-                if i['value'] < price:
-                    company = "Aeroflot"
-                    price = int(i["value"])
-                    datetime_flight = i['found_at']
-        if company == '0':
-            for i in todos2["best_prices"]:
-                    if i['value'] < price:
-                        company = i["gate"]
-                        price = int(i["value"])
-                        datetime_flight = i['found_at']
-        trip.flight_company1 = company
-        trip.flight_price1 = price
-        trip.flight_time1 = datetime_flight
-
-        URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
-        querystring = {"origin": todos['destination']['iata'],
-                       "destination": todos['origin']['iata'],
-                       "depart_date": str(trip.departure_time_home),
-                       "one_way": "true",
-                       }
-        response = requests.request("GET", URL_FLIGHT, params=querystring)
-        todos2 = json.loads(response.text)
-        print(todos2)
-        company = '0'
-        price = 9999999
-        datetime_flight = 0
-        for i in todos2["best_prices"]:
-            if i["gate"] == "Aeroflot":
-                if i['value'] < price:
-                    company = "Aeroflot"
-                    price = int(i["value"])
-                    datetime_flight = i['found_at']
-        if company == '0':
-            for i in todos2["best_prices"]:
-                    if i['value'] < price:
-                        company = i["gate"]
-                        price = int(i["value"])
-                        datetime_flight = i['found_at']
-        trip.flight_company2 = company
-        trip.flight_price2 = price
-        trip.flight_time2 = datetime_flight
-        print(trip.flight_company1, trip.flight_price1, trip.flight_time1)
-        print(trip.flight_company2, trip.flight_price2, trip.flight_time2)
-        # не работает ^
-        # session.commit()
-        if request.cookies.get("user_id", 0):
-            username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-            username += ' ' + session.query(users.User).filter(
-                users.User.id == request.cookies.get("user_id", 0)).first().secondname
-            usercity = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
-            return render_template('addtrip.html', title='Добавить поездку', username=username, usercity=usercity,
-                                   messagecomplite="Форма поездки составлена", form=form)
-        return render_template('addtrip.html', title='Добавить поездку', messagecomplite="Форма поездки составлена", form=form)
 
     if request.cookies.get("user_id", 0):
         username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name

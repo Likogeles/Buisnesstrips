@@ -23,8 +23,8 @@ class Trip(db_session.SqlAlchemyBase, SerializerMixin):
     flight_company2 = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     flight_price2 = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     flight_time2 = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    departure_time_city = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
-    departure_time_home = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+    departure_date_city = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+    departure_date_home = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
     duration = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
