@@ -403,7 +403,6 @@ def add_trip():
         trip.duration = str(trip.duration)
         trip.description = str(trip.description)
 
-
         if request.cookies.get("user_id", 0):
             session.add(trip)
         session.commit()
@@ -419,7 +418,7 @@ def add_trip():
 
 
 @app.route('/my_trips', methods=['GET', 'POST'])
-def mytrips():
+def my_trips():
     db_session.global_init("db/Buisness_trips.sqlite")
     session = db_session.create_session()
     form = baseform.BaseForm()
@@ -440,7 +439,6 @@ def mytrips():
                         }
                 arr.append(words)
 
-        print(arr)
         username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
         username += " " + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
         session.commit()
