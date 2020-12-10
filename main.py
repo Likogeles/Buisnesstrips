@@ -186,12 +186,14 @@ def add_trip():
         querystring = {"location": todos['destination']['iata'],
                        "checkIn": str(trip.departure_time_city),
                        "checkOut": str(trip.departure_time_home),
-                       "limit": "40",
+                       "limit": "500",
                        "currency": "RUB",
                        "adults": "1"
                        }
         response = requests.request("GET", URL_FLIGHT, params=querystring)
         todos1 = json.loads(response.text)
+        for i in todos1:
+            print(i)
         hostel = ["notname", 0.1, 0.1]
         max = -1
         for i in todos1:
@@ -333,16 +335,16 @@ def add_trip():
             return render_template('addtrip.html', title='Добавить поездку',
                                    messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
                                    form=form)
-        data = [['City of depurter', trip.city_from],
-                ['Destinatioin city', trip.city_where],
-                ['Flight price', str(trip.flight_price)],
-                ['Time in dep city ', str(trip.departure_time_city)],
-                ['Flight company dep', str(trip.flight_company)],
-                ['Flight company destin', 'Член'],
-                ['Hostel', str(trip.hostel)],
-                ['Hostel price', str(trip.hostel_price)]]
-        ExporToPDF(data, spacing=8)
-        return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
+        # data = [['City of depurter', trip.city_from],
+        #         ['Destinatioin city', trip.city_where],
+        #         ['Flight price', str(trip.flight_price)],
+        #         ['Time in dep city ', str(trip.departure_time_city)],
+        #         ['Flight company dep', str(trip.flight_company)],
+        #         ['Flight company destin', 'Член'],
+        #         ['Hostel', str(trip.hostel)],
+        #         ['Hostel price', str(trip.hostel_price)]]
+        # ExporToPDF(data, spacing=8)
+        # return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
 
     if request.cookies.get("user_id", 0):
         username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
