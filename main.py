@@ -176,9 +176,11 @@ def add_trip():
         URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
+
+        origin = "MOW"
+        dest = "KUF"
         if todos:
             print(todos['origin']['iata'] + "->" + todos['destination']['iata'])
-
             origin = todos['origin']['iata']
             dest = todos['destination']['iata']
         else:
@@ -277,8 +279,8 @@ def add_trip():
                                    messagefalse="В день отъезда нет подходящего рейса, измените дату отъезда, или город отправления", form=form)
 
         URL_FLIGHT = 'http://api.travelpayouts.com/v1/prices/direct'
-        querystring = {"origin": origin,
-                       "destination": dest,
+        querystring = {"origin": dest,
+                       "destination": origin,
                        "depart_date": "2020-12-10",
                        "token": "f69935f4d595df3fa57f95cf98bebf86",
                        }
@@ -291,22 +293,22 @@ def add_trip():
             airline = 0
             flight_number = 0
             departure_at = 0
-            for i in todos3[dest]:
-                if todos3[dest][i]['airline'] == "SU":
-                    if mini > todos3[dest][i]['price']:
-                        price = todos3[dest][i]['price']
+            for i in todos3[origin]:
+                if todos3[origin][i]['airline'] == "SU":
+                    if mini > todos3[origin][i]['price']:
+                        price = todos3[origin][i]['price']
                         airline = 'Aeroflot'
-                        flight_number = todos3[dest][i]['flight_number']
-                        departure_at = todos3[dest][i]['departure_at']
+                        flight_number = todos3[origin][i]['flight_number']
+                        departure_at = todos3[origin][i]['departure_at']
 
             if mini == 99999999:
                 air = 0
-                for i in todos3[dest]:
-                    if mini > todos3[dest][i]['price']:
-                        price = todos3[dest][i]['price']
-                        air = todos3[dest][i]['airline']
-                        flight_number = todos3[dest][i]['flight_number']
-                        departure_at = todos3[dest][i]['departure_at']
+                for i in todos3[origin]:
+                    if mini > todos3[origin][i]['price']:
+                        price = todos3[origin][i]['price']
+                        air = todos3[origin][i]['airline']
+                        flight_number = todos3[origin][i]['flight_number']
+                        departure_at = todos3[origin][i]['departure_at']
 
                 URL_FLIGHT = 'http://api.travelpayouts.com/data/ru/airlines.json'
                 querystring = {"token": "f69935f4d595df3fa57f95cf98bebf86"}
@@ -361,11 +363,13 @@ def add_trip():
                 ['Авиакомпания перелёта в пункт назначения', str(trip.flight_company1)],
                 ['Дата вылета в город назначения', str(trip.departure_date_city)[8:] + "-" + str(trip.departure_date_city)[5:7] + "-" + str(trip.departure_date_city)[:4]],
                 ['Время вылета в город назначения', str(trip.departure_time1)],
+                ['Номер рейса вылета в город назначения', str(trip.flight_number1)],
                 ['Цена полёта в город назначения', str(trip.flight_price1) + " руб."],
 
                 ['Авиакомпания перелёта обратно', str(trip.flight_company2)],
                 ['Дата вылета обратно', str(trip.departure_date_home)[8:] + "-" + str(trip.departure_date_home)[5:7] + "-" + str(trip.departure_date_home)[:4]],
                 ['Время вылета обратно', str(trip.departure_time2)],
+                ['Номер рейса вылета обратно', str(trip.flight_number2)],
                 ['Цена полёта обратно', str(trip.flight_price2) + " руб."],
 
                 ['Отель', str(trip.hostel)],
@@ -382,8 +386,8 @@ def add_trip():
         print(data)
         q = -1
         for i in session.query(trips.Trip).all():
-            q = i
-        trip.id = q.id + 1
+            q = i.id
+        trip.id = q + 1
 
         trip.traveler = str(trip.traveler)
         trip.city_from = str(trip.city_from)
@@ -395,9 +399,11 @@ def add_trip():
         trip.flight_company1 =str(trip.flight_company1)
         trip.flight_price1 = str(trip.flight_price1)
         trip.flight_time1 = str(trip.flight_time1)
+        trip.flight_number1 = str(trip.flight_number1)
         trip.flight_company2 = str(trip.flight_company2)
         trip.flight_price2 = str(trip.flight_price2)
         trip.flight_time2 = str(trip.flight_time2)
+        trip.flight_number2 = str(trip.flight_number2)
         trip.departure_date_city = str(trip.departure_date_city)
         trip.departure_date_home = str(trip.departure_date_home)
         trip.duration = str(trip.duration)
