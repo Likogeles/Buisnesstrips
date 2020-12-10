@@ -125,17 +125,18 @@ def log_out():
 
 def ExporToPDF(data, spacing=1):
     pdf = FPDF()
-    pdf.set_font("DejaVuSansCondenced", size=14)
+    pdf.add_font('DejaVuSansCondensed', '', 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font("DejaVuSansCondensed", size=12)
     pdf.add_page()
-    col_width = pdf.w / 4.5
-    row_height = pdf.font_size
+
+    col_width = pdf.w / 4 + 45
+    row_height = pdf.font_size + 1
     for row in data:
         for item in row:
-            pdf.cell(col_width, row_height * spacing,
+            pdf.cell(col_width, row_height * 2,
                      txt=item, border=1)
-        pdf.ln(row_height * spacing)
+        pdf.ln(row_height * spacing * 0.66)
     pdf.output('Depurt_City.pdf')
-
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -156,6 +157,7 @@ def add_trip():
         datee = form.departure_time_home.data - form.departure_time_city.data
         if datee.days < 0:
             return render_template('addtrip.html', messageduration="Продолжительность поездки введена неверно", form=form)
+        trip.duration = datee.days
 
         if request.cookies.get("user_id", 0):
             trip.traveler_id = request.cookies.get("user_id", 0)
@@ -163,12 +165,12 @@ def add_trip():
             trip.city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
 
         else:
+            trip.traveler = "Для указания имени, зарегестрируйтесь"
             trip.city_from = form.city_from.data
-        print(trip.city_from)
         trip.city_where = form.city_where.data
         trip.description = form.description.data
-        trip.departure_time_city = form.departure_time_city.data
-        trip.departure_time_home = form.departure_time_home.data
+        trip.departure_date_city = form.departure_time_city.data
+        trip.departure_date_home = form.departure_time_home.data
 
         URL_CITYES = f"https://www.travelpayouts.com/widgets_suggest_params?q=Из%20{trip.city_from}%20в%20{form.city_where.data}"
         response = requests.request("GET", URL_CITYES)
@@ -184,16 +186,14 @@ def add_trip():
 
         URL_FLIGHT = 'http://engine.hotellook.com/api/v2/cache.json'
         querystring = {"location": todos['destination']['iata'],
-                       "checkIn": str(trip.departure_time_city),
-                       "checkOut": str(trip.departure_time_home),
+                       "checkIn": str(trip.departure_date_city),
+                       "checkOut": str(trip.departure_date_home),
                        "limit": "500",
                        "currency": "RUB",
                        "adults": "1"
                        }
         response = requests.request("GET", URL_FLIGHT, params=querystring)
         todos1 = json.loads(response.text)
-        for i in todos1:
-            print(i)
         hostel = ["notname", 0.1, 0.1]
         max = -1
         for i in todos1:
@@ -218,7 +218,6 @@ def add_trip():
         trip.hostel_price = max
         trip.hostel_coordx = hostel[1]
         trip.hostel_coordy = hostel[2]
-
 
         URL_FLIGHT = 'http://api.travelpayouts.com/v1/prices/direct'
         querystring = {"origin": origin,
@@ -263,8 +262,8 @@ def add_trip():
                 trip.flight_price1 = price
                 trip.flight_company1 = airline
                 trip.flight_number1 = flight_number
-                trip.departure_date_city = departure_at[:11]
-                trip.departure_time1 = departure_at[11:]
+                # trip.departure_date_city = departure_at[:10]
+                trip.departure_time1 = departure_at[11:-1]
         else:
             if request.cookies.get("user_id", 0):
                 username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
@@ -319,8 +318,8 @@ def add_trip():
                 trip.flight_price2 = price
                 trip.flight_company2 = airline
                 trip.flight_number2 = flight_number
-                trip.departure_date_home = departure_at[:11]
-                trip.departure_time2 = departure_at[11:]
+                # trip.departure_date_home = departure_at[:10]
+                trip.departure_time2 = departure_at[11:-1]
         else:
             if request.cookies.get("user_id", 0):
                 username = session.query(users.User).filter(
@@ -335,16 +334,50 @@ def add_trip():
             return render_template('addtrip.html', title='Добавить поездку',
                                    messagefalse="В день возвращения нет подходящего рейса, измените дату возвращения",
                                    form=form)
-        # data = [['City of depurter', trip.city_from],
-        #         ['Destinatioin city', trip.city_where],
-        #         ['Flight price', str(trip.flight_price)],
-        #         ['Time in dep city ', str(trip.departure_time_city)],
-        #         ['Flight company dep', str(trip.flight_company)],
-        #         ['Flight company destin', 'Член'],
-        #         ['Hostel', str(trip.hostel)],
-        #         ['Hostel price', str(trip.hostel_price)]]
-        # ExporToPDF(data, spacing=8)
-        # return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
+
+        # traveler-
+        # city_from-
+        # city_where-
+        # flight_company1-
+        # flight_price1-
+        # flight_time1-
+        # flight_company2-
+        # flight_price2-
+        # flight_time2-
+        # departure_date_city-
+        # departure_date_home-
+        # hostel-
+        # hostel_price-
+        # hostel_coordx-
+        # hostel_coordy-
+        # duration-
+        # description-
+
+        data = [['Работник', trip.traveler],
+                ['Город отъезда', trip.city_from],
+                ['Город назначения', trip.city_where],
+
+                ['Авиакомпания перелёта в пункт назначения', str(trip.flight_company1)],
+                ['Дата вылета в город назначения', str(trip.departure_date_city)[8:] + "-" + str(trip.departure_date_city)[5:7] + "-" + str(trip.departure_date_city)[:4]],
+                ['Время вылета в город назначения', str(trip.departure_time1)],
+                ['Цена полёта в город назначения', str(trip.flight_price1)],
+
+                ['Авиакомпания перелёта обратно', str(trip.flight_company2)],
+                ['Дата вылета обратно', str(trip.departure_date_home)[8:] + "-" + str(trip.departure_date_home)[5:7] + "-" + str(trip.departure_date_home)[:4]],
+                ['Время вылета обратно', str(trip.departure_time2)],
+                ['Цена полёта обратно', str(trip.flight_price2)],
+
+                ['Отель', str(trip.hostel)],
+                ['Дата заезда в отель', str(trip.departure_date_city)[8:] + "-" + str(trip.departure_date_city)[5:7] + "-" + str(trip.departure_date_city)[:4]],
+                ['Дата отъезда из отеля', str(trip.departure_date_home)[8:] + "-" + str(trip.departure_date_home)[5:7] + "-" + str(trip.departure_date_home)[:4]],
+
+                ['Цена проживания за всё время', str(trip.hostel_price)],
+                ['Координаты отеля', str(trip.hostel_coordx) + ", " + str(trip.hostel_coordy)],
+                ['Продолжительность поездки (в днях)', str(trip.duration)],
+                ['Описание поездки', str(trip.description)]]
+        print(data)
+        ExporToPDF(data, spacing=3)
+        return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
 
     if request.cookies.get("user_id", 0):
         username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
@@ -359,41 +392,15 @@ def mytrips():
     db_session.global_init("db/Buisness_trips.sqlite")
     session = db_session.create_session()
     form = baseform.BaseForm()
-    productes = session.query(trips.Trip)
+    tripes = session.query(trips.Trip)
 
     if request.method == "GET":
-        productes = list(productes)
-
-        types = []
-        for i in productes:
-            if i.product_type not in types:
-                types.append(i.product_type)
-
+        tripes = list(tripes)
         if request.cookies.get("user_id", 0):
             username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-            return render_template('products.html', title="АлиАкспресс", products=productes, username=username, products_types=types)
-        return render_template('products.html', title="АлиАкспресс", products=productes, products_types=types)
-
-    elif request.method == "POST":
-
-        word = None
-        if form.search.data:
-            word = request.form["search"]
-
-        product_type = request.form.get("product_type")
-        if word:
-            return redirect("/filter_link/" + product_type + "/" + word)
-        elif product_type != "Все":
-            return redirect("/filter_link/" + product_type + "/any")
-        else:
-            types = []
-            for i in productes:
-                if i.product_type not in types:
-                    types.append(i.product_type)
-            if request.cookies.get("user_id", 0):
-                username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-                return render_template('products.html', title="АлиАкспресс", products=productes, username=username, products_types=types)
-            return render_template('products.html', title="АлиАкспресс", products=productes, products_types=types)
+            username += " " + session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().secondname
+            return render_template('trips.html', title="Мои поездки", trip=tripes, username=username)
+        return render_template('trips.html', title="Мои поездки", trip=tripes)
 
 
 if __name__ == '__main__':
