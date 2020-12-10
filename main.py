@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, make_response, jsonify, Blueprint
+from flask import Flask, render_template, redirect, request, make_response, jsonify, Blueprint, send_file
 from flask_login import LoginManager
 import json
 import requests
@@ -175,9 +175,18 @@ def add_trip():
         response = requests.request("GET", URL_CITYES)
         todos = json.loads(response.text)
         if todos:
-            data = [['origin', 'destination'], [todos['origin']['iata'], todos['destination']['iata']]]
-            ExporToPDF(data, spacing=1)
-            print(todos['origin']['iata'], "->", todos['destination']['iata'])
+            data = [['City of depurter', trip.city_from ],
+                    ['Destinatioin city',trip.city_where],
+                    ['Flight price', str(trip.flight_price)],
+                    ['Time in dep city ', str(trip.departure_time_city)],
+                    ['Flight company dep', str(trip.flight_company)],
+                    ['Flight company destin', 'Член'],
+                    ['Hostel', str(trip.hostel)],
+                    ['Hostel price', str(trip.hostel_price)]]
+            ExporToPDF(data, spacing=8)
+            print(trip.city_from)
+            print(todos['destination']['iata'])
+            print(trip.flight_price)
         else:
             return render_template('addtrip.html', messagecity="Название одного из городов введено неверно", form=form)
 
@@ -216,6 +225,10 @@ def add_trip():
         trip.hostel_price = max
         trip.hostel_coordx = hostel[1]
         trip.hostel_coordy = hostel[2]
+
+        return send_file('Depurt_City.pdf', attachment_filename='Depurt_City.pdf')
+
+
 
         URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
         querystring = {"origin": todos['origin']['iata'],
