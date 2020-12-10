@@ -72,10 +72,16 @@ def register():
                                    passwordmassage="Пароли не совпадают",
                                    form=form)
         user1 = users.User()
-        user1.firstname = form.firstname.data
+
+        q = -1
+        for i in session.query(users.User).all():
+            q = i
+        user1.id = q.id + 1
         user1.secondname = form.secondname.data
+        user1.name = form.name.data
         user1.email = form.email.data
         user1.password = form.password1.data
+        user1.city = form.city.data
 
         session.add(user1)
         session.commit()
@@ -116,126 +122,6 @@ def log_out():
     res.set_cookie("user_id", str(0), max_age=0)
     return res
 
-
-# @app.route('/product_link/<product_id>', methods=['GET', 'POST'])
-# def product_link(product_id="product_id"):
-#     db_session.global_init("db/online_shop.sqlite")
-#     session = db_session.create_session()
-#     form = baseform.BaseForm()
-#
-#     product = session.query(trips.Product).filter(trips.Product.id == product_id).first()
-#     if request.method == "GET":
-#         productes = session.query(trips.Product)
-#         types = []
-#         for i in productes:
-#             if i.product_type not in types:
-#                 types.append(i.product_type)
-#
-#         if request.cookies.get("user_id", 0):
-#             username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-#             userid = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().id
-#             return render_template('product.html', title=product.title, product=product, username=username, userid=userid, products_types=types)
-#         return render_template('product.html', title=product.title, product=product, products_types=types)
-#
-#     elif request.method == "POST":
-#         product_type = request.form.get("product_type")
-#         word = None
-#         if form.search.data:
-#             word = request.form["search"]
-#
-#         if word:
-#             return redirect("/filter_link/" + product_type + "/" + word)
-#         else:
-#             return redirect("/")
-#
-#
-# @app.route('/del_product/<id>', methods=['GET', 'POST'])
-# def del_product(id="id"):
-#     db_session.global_init("db/online_shop.sqlite")
-#     session = db_session.create_session()
-#     product = session.query(trips.Product).filter(trips.Product.id == id).first()
-#     if product:
-#         session.delete(product)
-#         session.commit()
-#     return redirect("/")
-#
-#
-# @app.route('/order_link/<id>', methods=['GET', 'POST'])
-# def order_link(id="id"):
-#     db_session.global_init("db/online_shop.sqlite")
-#     session = db_session.create_session()
-#     product = session.query(trips.Product).filter(trips.Product.id == id).first()
-#     if product:
-#         product.number -= 1
-#         session.commit()
-#     return redirect("/")
-#
-#
-# @app.route('/api_products', methods=['GET', 'POST'])
-# def api_products():
-#     db_session.global_init("db/online_shop.sqlite")
-#     session = db_session.create_session()
-#     productes = session.query(trips.Product)
-#     print(jsonify(
-#                 {
-#                     'products':
-#                         [item.to_dict(only=('title', 'number', 'price', 'seller_id')) for item in productes]
-#                 }
-#             ))
-#     return jsonify(
-#                 {
-#                     'products':
-#                         [item.to_dict(only=('title', 'number', 'price', 'seller_id')) for item in productes]
-#                 }
-#             )
-#
-#
-# @app.route('/filter_link/<product_type>/<word>', methods=['GET', 'POST'])
-# def filter_link(product_type="product_type", word="word"):
-#     db_session.global_init("db/online_shop.sqlite")
-#     session = db_session.create_session()
-#     form = baseform.BaseForm()
-#
-#     productes = session.query(trips.Product)
-#     if request.method == "GET":
-#
-#         arr = []
-#         if product_type != "Все" and word != "any":
-#             for item in productes:
-#                 if product_type == item.product_type and word in item.title:
-#                     arr.append(item)
-#         elif product_type != "Все":
-#             for item in productes:
-#                 if product_type == item.product_type:
-#                     arr.append(item)
-#         elif word != "any":
-#             for item in productes:
-#                 if word in item.title and item not in arr:
-#                     arr.append(item)
-#
-#         types = []
-#         for i in productes:
-#             if i.product_type not in types:
-#                 types.append(i.product_type)
-#
-#         if request.cookies.get("user_id", 0):
-#             username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
-#             return render_template('products.html', form=form, title="АлиАкспресс", products=arr, username=username, products_types=types)
-#         return render_template('products.html', form=form, title="АлиАкспресс", products=arr, products_types=types)
-#
-#     elif request.method == "POST":
-#
-#         product_type = request.form.get("product_type")
-#         word = None
-#         if form.search.data:
-#             word = request.form["search"]
-#
-#         if word:
-#             return redirect("/filter_link/" + product_type + "/" + word)
-#         elif product_type != "Все":
-#             return redirect("/filter_link/" + product_type + "/any")
-#         else:
-#             return redirect("/")
 
 def ExporToPDF(data, spacing=1):
     pdf = FPDF()
@@ -359,13 +245,14 @@ def add_trip():
         trip.flight_time1 = datetime_flight
 
         URL_FLIGHT = 'http://min-prices.aviasales.ru/calendar_preload'
-        querystring = {"origin": todos['origin']['iata'],
-                       "destination": todos['destination']['iata'],
+        querystring = {"origin": todos['destination']['iata'],
+                       "destination": todos['origin']['iata'],
                        "depart_date": str(trip.departure_time_home),
                        "one_way": "true",
                        }
         response = requests.request("GET", URL_FLIGHT, params=querystring)
         todos2 = json.loads(response.text)
+        print(todos2)
         company = '0'
         price = 9999999
         datetime_flight = 0
@@ -386,7 +273,7 @@ def add_trip():
         trip.flight_time2 = datetime_flight
         print(trip.flight_company1, trip.flight_price1, trip.flight_time1)
         print(trip.flight_company2, trip.flight_price2, trip.flight_time2)
-
+        # не работает ^
         # session.commit()
         if request.cookies.get("user_id", 0):
             username = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name

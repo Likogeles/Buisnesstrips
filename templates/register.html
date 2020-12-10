@@ -26,18 +26,27 @@
     <div class="col-auto" align="center">
         {{ form.hidden_tag() }}
         <p>
-            {{ form.firstname.label }}<br>
-            {{ form.firstname(class="form-control", type="string", placeholder="Имя") }}<br>
-            {% for error in form.firstname.errors %}
+            {{ form.name.label }}<br>
+            {{ form.name(class="form-control", type="string", placeholder="Имя") }}<br>
+            {% for error in form.name.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.firstname.label }}<br>
-            {{ form.firstname(class="form-control", type="string", placeholder="Фамилия") }}<br>
-            {% for error in form.firstname.errors %}
+            {{ form.secondname.label }}<br>
+            {{ form.secondname(class="form-control", type="string", placeholder="Фамилия") }}<br>
+            {% for error in form.secondname.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.city.label }}<br>
+            {{ form.city(class="form-control", type="string", placeholder="Фамилия") }}<br>
+            {% for error in form.city.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
