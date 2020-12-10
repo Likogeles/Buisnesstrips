@@ -163,9 +163,10 @@ def add_trip():
             trip.traveler_id = request.cookies.get("user_id", 0)
             trip.traveler = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().name
             trip.city_from = session.query(users.User).filter(users.User.id == request.cookies.get("user_id", 0)).first().city
+
         else:
             trip.city_from = form.city_from.data
-
+        print(trip.city_from)
         trip.city_where = form.city_where.data
         trip.description = form.description.data
         trip.departure_time_city = form.departure_time_city.data
