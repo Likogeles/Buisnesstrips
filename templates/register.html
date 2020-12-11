@@ -42,7 +42,7 @@
         </p>
         <p>
             {{ form.city.label }}<br>
-            {{ form.city(class="form-control", type="string", placeholder="Фамилия") }}<br>
+            {{ form.city(class="form-control", type="string", placeholder="Ваш город") }}<br>
             {% for error in form.city.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
