@@ -199,8 +199,10 @@ def add_trip():
         todos1 = json.loads(response.text)
         hostel = ["notname", 0.1, 0.1]
         max = -1
+        money = trip.duration * 7000
+
         for i in todos1:
-            if max < int(i["priceFrom"]) < 7000:
+            if max < int(i["priceFrom"]) < money:
                 max = int(i["priceFrom"])
                 hostel[0] = i["hotelName"]
                 hostel[1] = i["location"]["geo"]["lon"]
@@ -383,7 +385,10 @@ def add_trip():
                 ['Цена итого', str(int(trip.flight_price1) + int(trip.flight_price2) + int(trip.hostel_price)) + " руб."],
 
                 ['Описание поездки', str(trip.description)]]
-        print(data)
+
+        for i in data:
+            print(': '.join(i))
+
         q = -1
         for i in session.query(trips.Trip).all():
             q = i.id
